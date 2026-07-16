@@ -1,0 +1,293 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block pagina %}Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    .boas-vindas {
+        margin-bottom: 25px;
+    }
+
+    .boas-vindas h2 {
+        font-size: 27px;
+        margin-bottom: 7px;
+    }
+
+    .boas-vindas p {
+        color: #6b7280;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns:
+            repeat(auto-fit, minmax(210px, 1fr));
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .card-indicador {
+        padding: 22px;
+    }
+
+    .icone {
+        width: 48px;
+        height: 48px;
+        background: #fee2e2;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 17px;
+    }
+
+    .titulo {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 7px;
+    }
+
+    .valor {
+        font-size: 31px;
+        font-weight: 800;
+    }
+
+    .pedidos-recentes {
+        overflow: hidden;
+    }
+
+    .secao-topo {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .secao-topo h2 {
+        font-size: 20px;
+    }
+
+    .pedido-linha {
+        display: grid;
+        grid-template-columns:
+            90px minmax(170px, 1fr) 150px 130px 120px;
+        gap: 14px;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid #eef0f2;
+    }
+
+    .pedido-linha:last-child {
+        border-bottom: none;
+    }
+
+    .numero {
+        font-weight: 800;
+    }
+
+    .cliente {
+        font-weight: 700;
+    }
+
+    .telefone {
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .status {
+        display: inline-flex;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 7px 10px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .status-recebido {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-preparo {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-entrega {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .status-entregue {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cancelado {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .vazio {
+        padding: 45px 20px;
+        color: #6b7280;
+        text-align: center;
+    }
+
+    @media (max-width: 900px) {
+        .pedido-linha {
+            grid-template-columns: 80px 1fr 120px;
+        }
+
+        .data-coluna,
+        .status-coluna {
+            display: none;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .pedido-linha {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="boas-vindas">
+    <h2>Bem-vindo ao Nunes Delivery</h2>
+
+    <p>
+        Gerencie o cardápio e acompanhe os pedidos da loja.
+    </p>
+</div>
+
+<section class="cards">
+
+    <div class="card card-indicador">
+        <div class="icone">🧾</div>
+        <div class="titulo">Total de pedidos</div>
+        <div class="valor">{{ total_pedidos }}</div>
+    </div>
+
+    <div class="card card-indicador">
+        <div class="icone">🔔</div>
+        <div class="titulo">Pedidos recebidos</div>
+        <div class="valor">{{ pedidos_recebidos }}</div>
+    </div>
+
+    <div class="card card-indicador">
+        <div class="icone">👨‍🍳</div>
+        <div class="titulo">Em preparo</div>
+        <div class="valor">{{ pedidos_preparo }}</div>
+    </div>
+
+    <div class="card card-indicador">
+        <div class="icone">✅</div>
+        <div class="titulo">Pedidos entregues</div>
+        <div class="valor">{{ pedidos_entregues }}</div>
+    </div>
+
+    <div class="card card-indicador">
+        <div class="icone">🍔</div>
+        <div class="titulo">Produtos cadastrados</div>
+        <div class="valor">{{ total_produtos }}</div>
+    </div>
+
+    <div class="card card-indicador">
+        <div class="icone">📁</div>
+        <div class="titulo">Categorias</div>
+        <div class="valor">{{ total_categorias }}</div>
+    </div>
+
+</section>
+
+<section class="card pedidos-recentes">
+
+    <div class="secao-topo">
+        <h2>Pedidos recentes</h2>
+
+        <a
+            class="btn btn-vermelho"
+            href="{{ url_for('admin_pedidos') }}"
+        >
+            Ver todos
+        </a>
+    </div>
+
+    {% if pedidos_recentes %}
+
+        {% for pedido in pedidos_recentes %}
+
+            <div class="pedido-linha">
+
+                <div class="numero">
+                    #{{ pedido.id }}
+                </div>
+
+                <div>
+                    <div class="cliente">
+                        {{ pedido.nome_cliente }}
+                    </div>
+
+                    <div class="telefone">
+                        {{ pedido.telefone }}
+                    </div>
+                </div>
+
+                <div class="data-coluna">
+                    {{ pedido.criado_em.strftime("%d/%m/%Y %H:%M") }}
+                </div>
+
+                <div class="status-coluna">
+                    <span
+                        class="status
+                        {% if pedido.status == 'Recebido' %}
+                            status-recebido
+                        {% elif pedido.status == 'Em preparo' %}
+                            status-preparo
+                        {% elif pedido.status == 'Saiu para entrega' %}
+                            status-entrega
+                        {% elif pedido.status == 'Entregue' %}
+                            status-entregue
+                        {% else %}
+                            status-cancelado
+                        {% endif %}
+                        "
+                    >
+                        {{ pedido.status }}
+                    </span>
+                </div>
+
+                <div>
+                    <a
+                        class="btn btn-cinza"
+                        href="{{ url_for(
+                            'admin_detalhe_pedido',
+                            pedido_id=pedido.id
+                        ) }}"
+                    >
+                        Ver pedido
+                    </a>
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="vazio">
+            Nenhum pedido recebido ainda.
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

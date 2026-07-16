@@ -1,0 +1,260 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Categorias{% endblock %}
+{% block pagina %}Categorias{% endblock %}
+
+{% block styles %}
+<style>
+    .grade {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .formulario {
+        padding: 22px;
+    }
+
+    .formulario h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .campos {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+    }
+
+    .lista {
+        overflow: hidden;
+    }
+
+    .lista-topo {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .categoria-item {
+        display: grid;
+        grid-template-columns: 1fr 80px 100px 220px;
+        gap: 12px;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f1f3;
+    }
+
+    .categoria-item:last-child {
+        border-bottom: none;
+    }
+
+    .nome {
+        font-weight: 700;
+    }
+
+    .status {
+        display: inline-flex;
+        justify-content: center;
+        padding: 7px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .status.ativa {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status.inativa {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .acoes {
+        display: flex;
+        gap: 7px;
+        justify-content: flex-end;
+    }
+
+    .acoes form {
+        margin: 0;
+    }
+
+    .vazio {
+        padding: 40px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    @media (max-width: 1050px) {
+        .grade {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 750px) {
+        .categoria-item {
+            grid-template-columns: 1fr;
+        }
+
+        .acoes {
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="grade">
+
+    <section class="card formulario">
+        <h2>Nova categoria</h2>
+
+        <form method="POST">
+            <div class="campos">
+
+                <div class="campo">
+                    <label for="nome">Nome</label>
+
+                    <input
+                        id="nome"
+                        name="nome"
+                        type="text"
+                        placeholder="Ex.: Hambúrgueres"
+                        required
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="ordem">Ordem de exibição</label>
+
+                    <input
+                        id="ordem"
+                        name="ordem"
+                        type="number"
+                        value="0"
+                    >
+                </div>
+
+                <label class="checkbox">
+                    <input
+                        type="checkbox"
+                        name="ativa"
+                        checked
+                    >
+
+                    Categoria ativa
+                </label>
+
+                <button class="btn btn-vermelho" type="submit">
+                    Cadastrar categoria
+                </button>
+
+            </div>
+        </form>
+    </section>
+
+    <section class="card lista">
+
+        <div class="lista-topo">
+            <h2>Categorias cadastradas</h2>
+        </div>
+
+        {% if categorias %}
+            {% for categoria in categorias %}
+
+                <div class="categoria-item">
+
+                    <div>
+                        <div class="nome">
+                            {{ categoria.nome }}
+                        </div>
+
+                        <small>
+                            {{ categoria.produtos|length }}
+                            produto(s)
+                        </small>
+                    </div>
+
+                    <div>
+                        Ordem {{ categoria.ordem }}
+                    </div>
+
+                    <div>
+                        <span
+                            class="status {% if categoria.ativa %}ativa{% else %}inativa{% endif %}"
+                        >
+                            {% if categoria.ativa %}
+                                Ativa
+                            {% else %}
+                                Inativa
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="acoes">
+
+                        <a
+                            class="btn btn-cinza"
+                            href="{{ url_for(
+                                'editar_categoria',
+                                categoria_id=categoria.id
+                            ) }}"
+                        >
+                            Editar
+                        </a>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'alterar_status_categoria',
+                                categoria_id=categoria.id
+                            ) }}"
+                        >
+                            <button
+                                class="btn btn-amarelo"
+                                type="submit"
+                            >
+                                {% if categoria.ativa %}
+                                    Desativar
+                                {% else %}
+                                    Ativar
+                                {% endif %}
+                            </button>
+                        </form>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'excluir_categoria',
+                                categoria_id=categoria.id
+                            ) }}"
+                            onsubmit="return confirm('Deseja excluir esta categoria?')"
+                        >
+                            <button
+                                class="btn btn-perigo"
+                                type="submit"
+                            >
+                                Excluir
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+
+            {% endfor %}
+        {% else %}
+            <div class="vazio">
+                Nenhuma categoria cadastrada.
+            </div>
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

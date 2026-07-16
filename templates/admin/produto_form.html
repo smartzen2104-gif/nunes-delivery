@@ -1,0 +1,278 @@
+{% extends "admin/base_admin.html" %}
+
+{% if produto %}
+    {% set titulo = "Editar produto" %}
+{% else %}
+    {% set titulo = "Novo produto" %}
+{% endif %}
+
+{% block title %}{{ titulo }}{% endblock %}
+{% block pagina %}{{ titulo }}{% endblock %}
+
+{% block styles %}
+<style>
+    .formulario {
+        max-width: 850px;
+        padding: 24px;
+    }
+
+    .grade-formulario {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 19px;
+    }
+
+    .campo-completo {
+        grid-column: 1 / -1;
+    }
+
+    .opcoes {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        padding: 5px 0;
+    }
+
+    .imagem-atual {
+        width: 170px;
+        height: 140px;
+        border-radius: 15px;
+        background: #fee2e2;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 55px;
+        margin-top: 10px;
+    }
+
+    .imagem-atual img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .botoes {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 10px;
+        margin-top: 5px;
+    }
+
+    .ajuda {
+        color: #6b7280;
+        font-size: 12px;
+    }
+
+    @media (max-width: 650px) {
+        .grade-formulario {
+            grid-template-columns: 1fr;
+        }
+
+        .campo-completo,
+        .opcoes,
+        .botoes {
+            grid-column: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="card formulario">
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <div class="grade-formulario">
+
+            <div class="campo campo-completo">
+                <label for="nome">Nome do produto</label>
+
+                <input
+                    id="nome"
+                    name="nome"
+                    type="text"
+                    value="{{ produto.nome if produto else request.form.get('nome', '') }}"
+                    placeholder="Ex.: X-Bacon Especial"
+                    required
+                >
+            </div>
+
+            <div class="campo campo-completo">
+                <label for="descricao">Descrição</label>
+
+                <textarea
+                    id="descricao"
+                    name="descricao"
+                    placeholder="Ingredientes e detalhes do produto..."
+                >{{ produto.descricao if produto else request.form.get('descricao', '') }}</textarea>
+            </div>
+
+            <div class="campo">
+                <label for="preco">Preço</label>
+
+                <input
+                    id="preco"
+                    name="preco"
+                    type="text"
+                    value="{% if produto %}{{ '%.2f'|format(produto.preco)|replace('.', ',') }}{% else %}{{ request.form.get('preco', '') }}{% endif %}"
+                    placeholder="29,90"
+                    required
+                >
+            </div>
+
+            <div class="campo">
+                <label for="categoria_id">Categoria</label>
+
+                <select
+                    id="categoria_id"
+                    name="categoria_id"
+                    required
+                >
+                    <option value="">
+                        Selecione
+                    </option>
+
+                    {% for categoria in categorias %}
+                        <option
+                            value="{{ categoria.id }}"
+                            {% if produto and produto.categoria_id == categoria.id %}
+                                selected
+                            {% elif request.form.get('categoria_id') == categoria.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ categoria.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="emoji">Emoji sem imagem</label>
+
+                <input
+                    id="emoji"
+                    name="emoji"
+                    type="text"
+                    value="{{ produto.emoji if produto else request.form.get('emoji', '🍔') }}"
+                    maxlength="10"
+                >
+
+                <span class="ajuda">
+                    Aparece quando não houver foto.
+                </span>
+            </div>
+
+            <div class="campo">
+                <label for="imagem">Imagem do produto</label>
+
+                <input
+                    id="imagem"
+                    name="imagem"
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.webp"
+                >
+
+                <span class="ajuda">
+                    PNG, JPG, JPEG ou WEBP. Máximo 5 MB.
+                </span>
+            </div>
+
+            {% if produto %}
+                <div class="campo campo-completo">
+                    <label>Imagem atual</label>
+
+                    <div class="imagem-atual">
+                        {% if produto.imagem %}
+                            <img
+                                src="{{ url_for(
+                                    'static',
+                                    filename='uploads/' + produto.imagem
+                                ) }}"
+                                alt="{{ produto.nome }}"
+                            >
+                        {% else %}
+                            {{ produto.emoji }}
+                        {% endif %}
+                    </div>
+
+                    {% if produto.imagem %}
+                        <label
+                            class="checkbox"
+                            style="margin-top:12px;"
+                        >
+                            <input
+                                type="checkbox"
+                                name="remover_imagem"
+                            >
+
+                            Remover imagem atual
+                        </label>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="opcoes">
+
+                <label class="checkbox">
+                    <input
+                        type="checkbox"
+                        name="disponivel"
+                        {% if produto %}
+                            {% if produto.disponivel %}checked{% endif %}
+                        {% else %}
+                            checked
+                        {% endif %}
+                    >
+
+                    Produto disponível
+                </label>
+
+                <label class="checkbox">
+                    <input
+                        type="checkbox"
+                        name="destaque"
+                        {% if produto and produto.destaque %}
+                            checked
+                        {% endif %}
+                    >
+
+                    Produto em destaque
+                </label>
+
+            </div>
+
+            <div class="botoes">
+
+                <button
+                    class="btn btn-vermelho"
+                    type="submit"
+                >
+                    {% if produto %}
+                        Salvar alterações
+                    {% else %}
+                        Cadastrar produto
+                    {% endif %}
+                </button>
+
+                <a
+                    class="btn btn-cinza"
+                    href="{{ url_for('admin_produtos') }}"
+                >
+                    Cancelar
+                </a>
+
+            </div>
+
+        </div>
+    </form>
+
+</section>
+
+{% endblock %}

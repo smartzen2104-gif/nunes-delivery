@@ -1,0 +1,456 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Pedido #{{ pedido.id }}{% endblock %}
+{% block pagina %}Pedido #{{ pedido.id }}{% endblock %}
+
+{% block styles %}
+<style>
+    .topo-pedido {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 22px;
+    }
+
+    .topo-pedido p {
+        color: #6b7280;
+        margin-top: 6px;
+    }
+
+    .grade {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 370px;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .secao {
+        padding: 22px;
+        margin-bottom: 20px;
+    }
+
+    .secao:last-child {
+        margin-bottom: 0;
+    }
+
+    .secao h2 {
+        font-size: 19px;
+        margin-bottom: 17px;
+    }
+
+    .cliente-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .informacao {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 13px;
+        padding: 14px;
+    }
+
+    .informacao span {
+        display: block;
+        color: #6b7280;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .informacao strong {
+        line-height: 1.5;
+    }
+
+    .item {
+        display: grid;
+        grid-template-columns: 45px 1fr 120px;
+        gap: 13px;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid #eef0f2;
+    }
+
+    .item:last-child {
+        border-bottom: none;
+    }
+
+    .quantidade {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: #fee2e2;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+    }
+
+    .item-nome {
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .item-unitario {
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .item-total {
+        text-align: right;
+        font-weight: 800;
+    }
+
+    .resumo {
+        position: sticky;
+        top: 20px;
+        padding: 22px;
+    }
+
+    .status-atual {
+        border-radius: 15px;
+        padding: 16px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: 800;
+    }
+
+    .status-recebido {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-preparo {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-entrega {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .status-entregue {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cancelado {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .linha {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 12px;
+        color: #4b5563;
+    }
+
+    .linha.total {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 15px;
+        margin-top: 15px;
+        color: #111827;
+        font-size: 21px;
+        font-weight: 800;
+    }
+
+    .observacao {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 13px;
+        padding: 15px;
+        line-height: 1.5;
+        color: #9a3412;
+    }
+
+    @media (max-width: 900px) {
+        .grade {
+            grid-template-columns: 1fr;
+        }
+
+        .resumo {
+            position: static;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .topo-pedido {
+            flex-direction: column;
+        }
+
+        .cliente-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .item {
+            grid-template-columns: 42px 1fr;
+        }
+
+        .item-total {
+            grid-column: 2;
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="topo-pedido">
+
+    <div>
+        <h2>
+            Pedido #{{ pedido.id }}
+        </h2>
+
+        <p>
+            Recebido em
+            {{ pedido.criado_em.strftime("%d/%m/%Y às %H:%M") }}
+        </p>
+    </div>
+
+    <a
+        class="btn btn-cinza"
+        href="{{ url_for('admin_pedidos') }}"
+    >
+        ← Voltar
+    </a>
+
+</div>
+
+<div class="grade">
+
+    <div>
+
+        <section class="card secao">
+
+            <h2>Dados do cliente</h2>
+
+            <div class="cliente-grid">
+
+                <div class="informacao">
+                    <span>Nome</span>
+                    <strong>{{ pedido.nome_cliente }}</strong>
+                </div>
+
+                <div class="informacao">
+                    <span>Telefone</span>
+                    <strong>{{ pedido.telefone }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card secao">
+
+            <h2>Endereço de entrega</h2>
+
+            <div class="cliente-grid">
+
+                <div class="informacao">
+                    <span>Rua</span>
+                    <strong>{{ pedido.rua }}</strong>
+                </div>
+
+                <div class="informacao">
+                    <span>Número</span>
+                    <strong>{{ pedido.numero }}</strong>
+                </div>
+
+                <div class="informacao">
+                    <span>Bairro</span>
+                    <strong>{{ pedido.bairro }}</strong>
+                </div>
+
+                <div class="informacao">
+                    <span>CEP</span>
+                    <strong>{{ pedido.cep or "Não informado" }}</strong>
+                </div>
+
+                <div class="informacao">
+                    <span>Complemento</span>
+                    <strong>
+                        {{ pedido.complemento or "Não informado" }}
+                    </strong>
+                </div>
+
+                <div class="informacao">
+                    <span>Referência</span>
+                    <strong>
+                        {{ pedido.referencia or "Não informado" }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card secao">
+
+            <h2>Itens do pedido</h2>
+
+            {% for item in pedido.itens %}
+
+                <div class="item">
+
+                    <div class="quantidade">
+                        {{ item.quantidade }}x
+                    </div>
+
+                    <div>
+                        <div class="item-nome">
+                            {{ item.nome_produto }}
+                        </div>
+
+                        <div class="item-unitario">
+                            R$
+                            {{ "%.2f"|format(item.preco_unitario)|replace(".", ",") }}
+                            cada
+                        </div>
+                    </div>
+
+                    <div class="item-total">
+                        R$
+                        {{ "%.2f"|format(item.total_item)|replace(".", ",") }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </section>
+
+        {% if pedido.observacao %}
+
+            <section class="card secao">
+
+                <h2>Observação do cliente</h2>
+
+                <div class="observacao">
+                    {{ pedido.observacao }}
+                </div>
+
+            </section>
+
+        {% endif %}
+
+    </div>
+
+    <aside class="card resumo">
+
+        <div
+            class="status-atual
+            {% if pedido.status == 'Recebido' %}
+                status-recebido
+            {% elif pedido.status == 'Em preparo' %}
+                status-preparo
+            {% elif pedido.status == 'Saiu para entrega' %}
+                status-entrega
+            {% elif pedido.status == 'Entregue' %}
+                status-entregue
+            {% else %}
+                status-cancelado
+            {% endif %}
+            "
+        >
+            {{ pedido.status }}
+        </div>
+
+        <form
+            class="status-form"
+            method="POST"
+            action="{{ url_for(
+                'atualizar_status_pedido',
+                pedido_id=pedido.id
+            ) }}"
+        >
+
+            <input
+                type="hidden"
+                name="pagina_retorno"
+                value="detalhe"
+            >
+
+            <div class="campo">
+                <label for="status">
+                    Alterar status
+                </label>
+
+                <select
+                    id="status"
+                    name="status"
+                >
+                    {% for status in status_disponiveis %}
+                        <option
+                            value="{{ status }}"
+                            {% if pedido.status == status %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ status }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button
+                class="btn btn-vermelho"
+                type="submit"
+            >
+                Atualizar pedido
+            </button>
+
+        </form>
+
+        <div class="linha">
+            <span>Pagamento</span>
+            <strong>{{ pedido.forma_pagamento }}</strong>
+        </div>
+
+        <div class="linha">
+            <span>Subtotal</span>
+
+            <strong>
+                R$
+                {{ "%.2f"|format(pedido.subtotal)|replace(".", ",") }}
+            </strong>
+        </div>
+
+        <div class="linha">
+            <span>Taxa de entrega</span>
+
+            <strong>
+                R$
+                {{ "%.2f"|format(pedido.taxa_entrega)|replace(".", ",") }}
+            </strong>
+        </div>
+
+        <div class="linha total">
+            <span>Total</span>
+
+            <strong>
+                R$
+                {{ "%.2f"|format(pedido.total)|replace(".", ",") }}
+            </strong>
+        </div>
+
+    </aside>
+
+</div>
+
+{% endblock %}

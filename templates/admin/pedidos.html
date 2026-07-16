@@ -1,0 +1,318 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Pedidos{% endblock %}
+{% block pagina %}Pedidos{% endblock %}
+
+{% block styles %}
+<style>
+    .cabecalho-pagina {
+        margin-bottom: 20px;
+    }
+
+    .cabecalho-pagina h2 {
+        margin-bottom: 6px;
+    }
+
+    .cabecalho-pagina p {
+        color: #6b7280;
+    }
+
+    .filtros {
+        padding: 17px;
+        margin-bottom: 20px;
+    }
+
+    .filtros form {
+        display: grid;
+        grid-template-columns: 1fr 230px auto;
+        gap: 12px;
+        align-items: end;
+    }
+
+    .lista {
+        overflow: hidden;
+    }
+
+    .pedido {
+        display: grid;
+        grid-template-columns:
+            90px minmax(180px, 1fr) 145px 130px 140px 120px;
+        gap: 14px;
+        align-items: center;
+        padding: 17px 20px;
+        border-bottom: 1px solid #eef0f2;
+        transition: 0.2s;
+    }
+
+    .pedido:hover {
+        background: #fafafa;
+    }
+
+    .pedido:last-child {
+        border-bottom: none;
+    }
+
+    .pedido.novo {
+        border-left: 4px solid #2563eb;
+        background: #f8fbff;
+    }
+
+    .numero {
+        font-weight: 800;
+        font-size: 16px;
+    }
+
+    .cliente {
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .telefone {
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .valor {
+        font-weight: 800;
+    }
+
+    .status {
+        display: inline-flex;
+        justify-content: center;
+        padding: 8px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .status-recebido {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-preparo {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-entrega {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .status-entregue {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cancelado {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-form {
+        display: flex;
+        gap: 7px;
+    }
+
+    .status-form select {
+        min-width: 160px;
+    }
+
+    .vazio {
+        padding: 55px 20px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    @media (max-width: 1150px) {
+        .pedido {
+            grid-template-columns:
+                80px minmax(180px, 1fr) 120px 120px 120px;
+        }
+
+        .data-coluna {
+            display: none;
+        }
+    }
+
+    @media (max-width: 850px) {
+        .filtros form {
+            grid-template-columns: 1fr;
+        }
+
+        .pedido {
+            grid-template-columns: 70px 1fr 120px;
+        }
+
+        .valor-coluna,
+        .status-coluna {
+            display: none;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .pedido {
+            grid-template-columns: 1fr;
+        }
+
+        .acoes-coluna {
+            display: flex;
+            justify-content: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="cabecalho-pagina">
+    <h2>Pedidos da loja</h2>
+
+    <p>
+        Acompanhe e atualize o andamento dos pedidos.
+    </p>
+</div>
+
+<section class="card filtros">
+
+    <form method="GET">
+
+        <div class="campo">
+            <label for="busca">
+                Pesquisar
+            </label>
+
+            <input
+                id="busca"
+                type="text"
+                name="busca"
+                value="{{ busca }}"
+                placeholder="Número, cliente ou telefone..."
+            >
+        </div>
+
+        <div class="campo">
+            <label for="status">
+                Status
+            </label>
+
+            <select
+                id="status"
+                name="status"
+            >
+                <option value="">
+                    Todos os status
+                </option>
+
+                {% for status in status_disponiveis %}
+                    <option
+                        value="{{ status }}"
+                        {% if status_filtro == status %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ status }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button
+            class="btn btn-vermelho"
+            type="submit"
+        >
+            Filtrar
+        </button>
+
+    </form>
+
+</section>
+
+<section class="card lista">
+
+    {% if pedidos %}
+
+        {% for pedido in pedidos %}
+
+            <article
+                class="pedido {% if pedido.status == 'Recebido' %}novo{% endif %}"
+            >
+
+                <div class="numero">
+                    #{{ pedido.id }}
+                </div>
+
+                <div>
+                    <div class="cliente">
+                        {{ pedido.nome_cliente }}
+                    </div>
+
+                    <div class="telefone">
+                        {{ pedido.telefone }}
+                    </div>
+                </div>
+
+                <div class="data-coluna">
+                    {{ pedido.criado_em.strftime("%d/%m/%Y") }}
+                    <br>
+                    <small>
+                        {{ pedido.criado_em.strftime("%H:%M") }}
+                    </small>
+                </div>
+
+                <div class="valor valor-coluna">
+                    R$
+                    {{ "%.2f"|format(pedido.total)|replace(".", ",") }}
+                </div>
+
+                <div class="status-coluna">
+                    <span
+                        class="status
+                        {% if pedido.status == 'Recebido' %}
+                            status-recebido
+                        {% elif pedido.status == 'Em preparo' %}
+                            status-preparo
+                        {% elif pedido.status == 'Saiu para entrega' %}
+                            status-entrega
+                        {% elif pedido.status == 'Entregue' %}
+                            status-entregue
+                        {% else %}
+                            status-cancelado
+                        {% endif %}
+                        "
+                    >
+                        {{ pedido.status }}
+                    </span>
+                </div>
+
+                <div class="acoes-coluna">
+
+                    <a
+                        class="btn btn-cinza"
+                        href="{{ url_for(
+                            'admin_detalhe_pedido',
+                            pedido_id=pedido.id
+                        ) }}"
+                    >
+                        Ver pedido
+                    </a>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="vazio">
+            <h3>Nenhum pedido encontrado</h3>
+            <p>Altere os filtros ou aguarde novos pedidos.</p>
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

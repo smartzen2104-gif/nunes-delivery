@@ -1,0 +1,347 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Produtos{% endblock %}
+{% block pagina %}Produtos{% endblock %}
+
+{% block styles %}
+<style>
+    .acoes-topo {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .acoes-topo h2 {
+        margin-bottom: 6px;
+    }
+
+    .acoes-topo p {
+        color: #6b7280;
+    }
+
+    .filtros {
+        padding: 17px;
+        margin-bottom: 20px;
+    }
+
+    .filtros form {
+        display: grid;
+        grid-template-columns: 1fr 240px auto;
+        gap: 12px;
+        align-items: end;
+    }
+
+    .lista {
+        overflow: hidden;
+    }
+
+    .produto {
+        display: grid;
+        grid-template-columns:
+            75px minmax(180px, 1fr) 130px 120px 110px 260px;
+        gap: 14px;
+        align-items: center;
+        padding: 15px 18px;
+        border-bottom: 1px solid #eef0f2;
+    }
+
+    .produto:last-child {
+        border-bottom: none;
+    }
+
+    .imagem {
+        width: 65px;
+        height: 65px;
+        border-radius: 13px;
+        background: #fee2e2;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 31px;
+    }
+
+    .imagem img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .nome {
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .descricao {
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .preco {
+        font-weight: 800;
+    }
+
+    .status {
+        padding: 7px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        display: inline-flex;
+        justify-content: center;
+    }
+
+    .status.disponivel {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status.indisponivel {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .acoes {
+        display: flex;
+        gap: 7px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .acoes form {
+        margin: 0;
+    }
+
+    .vazio {
+        padding: 50px 20px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    @media (max-width: 1150px) {
+        .produto {
+            grid-template-columns:
+                70px minmax(180px, 1fr) 110px 220px;
+        }
+
+        .categoria-coluna,
+        .status-coluna {
+            display: none;
+        }
+    }
+
+    @media (max-width: 750px) {
+        .acoes-topo {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filtros form {
+            grid-template-columns: 1fr;
+        }
+
+        .produto {
+            grid-template-columns: 65px 1fr;
+        }
+
+        .preco-coluna {
+            grid-column: 2;
+        }
+
+        .acoes {
+            grid-column: 1 / -1;
+            justify-content: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="acoes-topo">
+    <div>
+        <h2>Cardápio da loja</h2>
+        <p>Cadastre, edite e organize seus produtos.</p>
+    </div>
+
+    <a
+        class="btn btn-vermelho"
+        href="{{ url_for('novo_produto') }}"
+    >
+        + Novo produto
+    </a>
+</div>
+
+<section class="card filtros">
+    <form method="GET">
+
+        <div class="campo">
+            <label for="busca">Pesquisar</label>
+
+            <input
+                id="busca"
+                type="text"
+                name="busca"
+                value="{{ busca }}"
+                placeholder="Pesquisar produto..."
+            >
+        </div>
+
+        <div class="campo">
+            <label for="categoria">Categoria</label>
+
+            <select
+                id="categoria"
+                name="categoria"
+            >
+                <option value="">
+                    Todas as categorias
+                </option>
+
+                {% for categoria in categorias %}
+                    <option
+                        value="{{ categoria.id }}"
+                        {% if categoria_selecionada == categoria.id|string %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ categoria.nome }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button
+            class="btn btn-vermelho"
+            type="submit"
+        >
+            Filtrar
+        </button>
+
+    </form>
+</section>
+
+<section class="card lista">
+
+    {% if produtos %}
+
+        {% for produto in produtos %}
+
+            <article class="produto">
+
+                <div class="imagem">
+                    {% if produto.imagem %}
+                        <img
+                            src="{{ url_for(
+                                'static',
+                                filename='uploads/' + produto.imagem
+                            ) }}"
+                            alt="{{ produto.nome }}"
+                        >
+                    {% else %}
+                        {{ produto.emoji }}
+                    {% endif %}
+                </div>
+
+                <div>
+                    <div class="nome">
+                        {{ produto.nome }}
+
+                        {% if produto.destaque %}
+                            ⭐
+                        {% endif %}
+                    </div>
+
+                    <div class="descricao">
+                        {{ produto.descricao or "Sem descrição" }}
+                    </div>
+                </div>
+
+                <div class="categoria-coluna">
+                    {{ produto.categoria.nome }}
+                </div>
+
+                <div class="preco preco-coluna">
+                    R$
+                    {{ "%.2f"|format(produto.preco)|replace(".", ",") }}
+                </div>
+
+                <div class="status-coluna">
+                    <span
+                        class="status {% if produto.disponivel %}disponivel{% else %}indisponivel{% endif %}"
+                    >
+                        {% if produto.disponivel %}
+                            Disponível
+                        {% else %}
+                            Indisponível
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="acoes">
+
+                    <a
+                        class="btn btn-cinza"
+                        href="{{ url_for(
+                            'editar_produto',
+                            produto_id=produto.id
+                        ) }}"
+                    >
+                        Editar
+                    </a>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'alterar_status_produto',
+                            produto_id=produto.id
+                        ) }}"
+                    >
+                        <button
+                            class="btn btn-amarelo"
+                            type="submit"
+                        >
+                            {% if produto.disponivel %}
+                                Ocultar
+                            {% else %}
+                                Mostrar
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'excluir_produto',
+                            produto_id=produto.id
+                        ) }}"
+                        onsubmit="return confirm('Deseja excluir este produto?')"
+                    >
+                        <button
+                            class="btn btn-perigo"
+                            type="submit"
+                        >
+                            Excluir
+                        </button>
+                    </form>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="vazio">
+            <h3>Nenhum produto encontrado</h3>
+            <p>Cadastre um produto ou altere os filtros.</p>
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

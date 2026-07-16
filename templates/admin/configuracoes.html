@@ -1,0 +1,497 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Configurações{% endblock %}
+{% block pagina %}Configurações{% endblock %}
+
+{% block styles %}
+<style>
+    .cabecalho-pagina {
+        margin-bottom: 22px;
+    }
+
+    .cabecalho-pagina h2 {
+        margin-bottom: 6px;
+    }
+
+    .cabecalho-pagina p {
+        color: #6b7280;
+    }
+
+    .grade {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 22px;
+        align-items: start;
+    }
+
+    .formulario {
+        padding: 24px;
+    }
+
+    .secao {
+        padding-bottom: 25px;
+        margin-bottom: 25px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .secao:last-child {
+        padding-bottom: 0;
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .secao h3 {
+        font-size: 19px;
+        margin-bottom: 6px;
+    }
+
+    .secao-descricao {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 19px;
+    }
+
+    .campos {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .campo-completo {
+        grid-column: 1 / -1;
+    }
+
+    .rodape-formulario {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 23px;
+    }
+
+    .painel-status {
+        padding: 22px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .painel-status h3 {
+        margin-bottom: 18px;
+    }
+
+    .status-loja {
+        border-radius: 16px;
+        padding: 18px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .status-loja.aberta {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .status-loja.fechada {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .status-icone {
+        font-size: 32px;
+        margin-bottom: 9px;
+    }
+
+    .status-loja strong {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+
+    .resumo-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 13px 0;
+        border-bottom: 1px solid #eef0f2;
+        font-size: 14px;
+    }
+
+    .resumo-item:last-child {
+        border-bottom: none;
+    }
+
+    .resumo-item span {
+        color: #6b7280;
+    }
+
+    .aviso-pix {
+        margin-top: 20px;
+        padding: 15px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 13px;
+        color: #1e40af;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .switch-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 16px;
+    }
+
+    .switch-texto strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .switch-texto span {
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 54px;
+        height: 30px;
+        flex-shrink: 0;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        inset: 0;
+        background: #d1d5db;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: 0.25s;
+    }
+
+    .slider::before {
+        content: "";
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        left: 4px;
+        top: 4px;
+        background: white;
+        border-radius: 50%;
+        transition: 0.25s;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .switch input:checked + .slider {
+        background: #16a34a;
+    }
+
+    .switch input:checked + .slider::before {
+        transform: translateX(24px);
+    }
+
+    @media (max-width: 900px) {
+        .grade {
+            grid-template-columns: 1fr;
+        }
+
+        .painel-status {
+            position: static;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .campos {
+            grid-template-columns: 1fr;
+        }
+
+        .campo-completo {
+            grid-column: auto;
+        }
+
+        .formulario {
+            padding: 18px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="cabecalho-pagina">
+    <h2>Configurações da loja</h2>
+
+    <p>
+        Configure os dados exibidos no cardápio e no pagamento.
+    </p>
+</div>
+
+<div class="grade">
+
+    <section class="card formulario">
+
+        <form method="POST">
+
+            <div class="secao">
+
+                <h3>Informações da loja</h3>
+
+                <p class="secao-descricao">
+                    Esses dados aparecem para os clientes.
+                </p>
+
+                <div class="campos">
+
+                    <div class="campo campo-completo">
+                        <label for="nome_loja">
+                            Nome da loja
+                        </label>
+
+                        <input
+                            id="nome_loja"
+                            name="nome_loja"
+                            type="text"
+                            value="{{ configuracao.nome_loja or '' }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo campo-completo">
+                        <label for="descricao">
+                            Descrição
+                        </label>
+
+                        <textarea
+                            id="descricao"
+                            name="descricao"
+                            placeholder="Uma frase sobre a loja..."
+                        >{{ configuracao.descricao or '' }}</textarea>
+                    </div>
+
+                    <div class="campo campo-completo">
+                        <label for="telefone">
+                            Telefone ou WhatsApp
+                        </label>
+
+                        <input
+                            id="telefone"
+                            name="telefone"
+                            type="text"
+                            value="{{ configuracao.telefone or '' }}"
+                            placeholder="(00) 00000-0000"
+                        >
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="secao">
+
+                <h3>Entrega e valores</h3>
+
+                <p class="secao-descricao">
+                    Defina os valores usados no checkout.
+                </p>
+
+                <div class="campos">
+
+                    <div class="campo">
+                        <label for="taxa_entrega">
+                            Taxa de entrega
+                        </label>
+
+                        <input
+                            id="taxa_entrega"
+                            name="taxa_entrega"
+                            type="text"
+                            value="{{ '%.2f'|format(configuracao.taxa_entrega or 0)|replace('.', ',') }}"
+                            placeholder="5,00"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="pedido_minimo">
+                            Pedido mínimo
+                        </label>
+
+                        <input
+                            id="pedido_minimo"
+                            name="pedido_minimo"
+                            type="text"
+                            value="{{ '%.2f'|format(configuracao.pedido_minimo or 0)|replace('.', ',') }}"
+                            placeholder="20,00"
+                        >
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="secao">
+
+                <h3>Pagamento PIX</h3>
+
+                <p class="secao-descricao">
+                    A chave será mostrada após o cliente finalizar.
+                </p>
+
+                <div class="campo">
+                    <label for="chave_pix">
+                        Chave PIX
+                    </label>
+
+                    <input
+                        id="chave_pix"
+                        name="chave_pix"
+                        type="text"
+                        value="{{ configuracao.chave_pix or '' }}"
+                        placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
+                    >
+                </div>
+
+            </div>
+
+            <div class="secao">
+
+                <h3>Funcionamento</h3>
+
+                <p class="secao-descricao">
+                    Feche a loja para impedir novos pedidos.
+                </p>
+
+                <div class="switch-area">
+
+                    <div class="switch-texto">
+                        <strong>Receber pedidos</strong>
+
+                        <span>
+                            Quando desligado, o cardápio fica visível,
+                            mas não permite finalizar pedidos.
+                        </span>
+                    </div>
+
+                    <label class="switch">
+                        <input
+                            type="checkbox"
+                            name="loja_aberta"
+                            {% if configuracao.loja_aberta %}
+                                checked
+                            {% endif %}
+                        >
+
+                        <span class="slider"></span>
+                    </label>
+
+                </div>
+
+            </div>
+
+            <div class="rodape-formulario">
+                <button
+                    class="btn btn-vermelho"
+                    type="submit"
+                >
+                    Salvar configurações
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+    <aside class="card painel-status">
+
+        <h3>Resumo atual</h3>
+
+        <div
+            class="status-loja
+            {% if configuracao.loja_aberta %}
+                aberta
+            {% else %}
+                fechada
+            {% endif %}
+            "
+        >
+
+            <div class="status-icone">
+                {% if configuracao.loja_aberta %}
+                    🟢
+                {% else %}
+                    🔴
+                {% endif %}
+            </div>
+
+            <strong>
+                {% if configuracao.loja_aberta %}
+                    Loja aberta
+                {% else %}
+                    Loja fechada
+                {% endif %}
+            </strong>
+
+            <span>
+                {% if configuracao.loja_aberta %}
+                    Aceitando novos pedidos
+                {% else %}
+                    Novos pedidos bloqueados
+                {% endif %}
+            </span>
+
+        </div>
+
+        <div class="resumo-item">
+            <span>Taxa de entrega</span>
+
+            <strong>
+                R$
+                {{ "%.2f"|format(configuracao.taxa_entrega or 0)|replace(".", ",") }}
+            </strong>
+        </div>
+
+        <div class="resumo-item">
+            <span>Pedido mínimo</span>
+
+            <strong>
+                R$
+                {{ "%.2f"|format(configuracao.pedido_minimo or 0)|replace(".", ",") }}
+            </strong>
+        </div>
+
+        <div class="resumo-item">
+            <span>Pagamento</span>
+            <strong>PIX</strong>
+        </div>
+
+        <div class="resumo-item">
+            <span>Chave PIX</span>
+
+            <strong>
+                {% if configuracao.chave_pix %}
+                    Cadastrada
+                {% else %}
+                    Não cadastrada
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="aviso-pix">
+            Cadastre a chave PIX antes de disponibilizar
+            o sistema para os clientes.
+        </div>
+
+    </aside>
+
+</div>
+
+{% endblock %}
